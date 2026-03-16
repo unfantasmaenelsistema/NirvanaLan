@@ -32,6 +32,9 @@ Diseñada para administradores de sistemas, equipos de IT y profesionales de seg
 |-----------|---------------|-----------------|
 | Vista general con métricas y gráficas de riesgo | Escaneo de red con progreso en tiempo real | Listado priorizado por severidad con recomendaciones |
 
+![Dashboard](images/01.png)
+![Descubrimiento](images/02.png)
+![Vulnerabilidades](images/03.png)
 ---
 
 ## Características
