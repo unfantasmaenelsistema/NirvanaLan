@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nirvana LAN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="/static/img/logo.png" alt="Nirvana LAN" class="logo-img">
+    <div class="logo-text">
+      <span class="logo-title">NIRVANA</span>
+      <span class="logo-sub">LAN AUDIT</span>
+    </div>
+  </div>
+
+  <div class="nav-section-label">PHASES</div>
+  <ul class="nav-links">
+    <li><a href="#" class="nav-link active" data-view="dashboard">
+      <span class="nav-icon">⬡</span><span>Dashboard</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="discovery">
+      <span class="nav-icon">◎</span><span>Discovery</span>
+      <span class="phase-tag">Phase 1</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="ports">
+      <span class="nav-icon">◈</span><span>Port Scanner</span>
+      <span class="phase-tag">Phase 1</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="enumerate">
+      <span class="nav-icon">◇</span><span>Enumeration</span>
+      <span class="phase-tag">Phase 1</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="vulns">
+      <span class="nav-icon">⚠</span><span>Vulnerabilities</span>
+      <span class="phase-tag">Phase 2</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="hosts">
+      <span class="nav-icon">◉</span><span>Host Inventory</span>
+    </a></li>
+  </ul>
+
+  <div class="nav-section-label">MANAGE</div>
+  <ul class="nav-links">
+    <li><a href="#" class="nav-link" data-view="scheduler">
+      <span class="nav-icon">◷</span><span>Scheduler</span>
+    </a></li>
+    <li><a href="#" class="nav-link" data-view="reports">
+      <span class="nav-icon">▣</span><span>Reports</span>
+    </a></li>
+  </ul>
+
+  <div class="sidebar-bottom">
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+      <span id="themeIcon">☀</span>
+    </button>
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      <span id="networkInfo">Loading...</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <div class="breadcrumb">
+      <span id="currentViewLabel">Dashboard</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="clock" id="clock"></span>
+      <button class="btn-primary btn-sm" onclick="quickScan()">⚡ Quick Scan</button>
+    </div>
+  </header>
+
+  <!-- VIEWS -->
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="view-header">
+      <h1>Network Overview</h1>
+      <p class="view-sub">Real-time audit dashboard for your local network</p>
+    </div>
+
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card">
+        <div class="stat-icon">◎</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-hosts">—</div>
+          <div class="stat-label">Hosts Discovered</div>
+        </div>
+      </div>
+      <div class="stat-card stat-critical">
+        <div class="stat-icon">☠</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-critical">—</div>
+          <div class="stat-label">Critical Findings</div>
+        </div>
+      </div>
+      <div class="stat-card stat-high">
+        <div class="stat-icon">⚠</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-high">—</div>
+          <div class="stat-label">High Severity</div>
+        </div>
+      </div>
+      <div class="stat-card stat-medium">
+        <div class="stat-icon">◈</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-medium">—</div>
+          <div class="stat-label">Medium Severity</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">▣</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-vulns">—</div>
+          <div class="stat-label">Total Vulnerabilities</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">◷</div>
+        <div class="stat-body">
+          <div class="stat-num" id="stat-scans">—</div>
+          <div class="stat-label">Scans Performed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h2>Top Open Ports</h2>
+        </div>
+        <div class="card-body" id="topPortsChart">
+          <div class="empty-state">Run a scan to see port data</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Risk Distribution</h2>
+        </div>
+        <div class="card-body" id="riskChart">
+          <div class="empty-state">Run vulnerability scans to see data</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-header">
+        <h2>Recent Hosts</h2>
+        <a href="#" class="link" data-view="hosts">View all →</a>
+      </div>
+      <div class="card-body" id="recentHostsTable">
+        <div class="empty-state">No hosts discovered yet. Run a Discovery scan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCOVERY -->
+  <div class="view" id="view-discovery">
+    <div class="view-header">
+      <h1>Network Discovery</h1>
+      <p class="view-sub">Phase 1 — Discover active hosts via Ping, ARP, and IP range scanning</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h2>Scan Configuration</h2></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Network / Range</label>
+            <input type="text" id="discTarget" placeholder="e.g. 192.168.1.0/24" class="input">
+            <div class="input-hint" id="networkHint">Detecting local network...</div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="osDetect" checked>
+              <span>OS Fingerprinting (TTL analysis)</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="resolveHostnames" checked>
+              <span>Resolve Hostnames (reverse DNS)</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="vendorLookup" checked>
+              <span>MAC Vendor Lookup</span>
+            </label>
+          </div>
+          <button class="btn-primary" id="startDiscovery" onclick="startDiscovery()">
+            ▶ Start Discovery Scan
+          </button>
+          <button class="btn-danger btn-sm ml-8" onclick="clearHosts()">🗑 Clear All Hosts</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Scan Progress</h2></div>
+        <div class="card-body">
+          <div id="discProgress" class="scan-progress-area">
+            <div class="scan-idle">No scan running</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-header">
+        <h2>Discovered Hosts</h2>
+        <span class="badge-count" id="discHostCount">0</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="data-table" id="discHostsTable">
+          <thead>
+            <tr>
+              <th>IP Address</th><th>Hostname</th><th>MAC Address</th>
+              <th>Vendor</th><th>OS</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="discHostsBody">
+            <tr><td colspan="7" class="empty-row">No hosts found yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORT SCANNER -->
+  <div class="view" id="view-ports">
+    <div class="view-header">
+      <h1>Port Scanner</h1>
+      <p class="view-sub">Phase 1 — Enumerate open ports, services and grab banners</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h2>Port Scan Config</h2></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Target IP</label>
+            <input type="text" id="portTarget" placeholder="e.g. 192.168.1.1" class="input">
+          </div>
+          <div class="form-group">
+            <label>Port Range</label>
+            <select class="input" id="portRange">
+              <option value="common">Common Ports (~50)</option>
+              <option value="top1000">Top 1000</option>
+              <option value="1-1024">Well-known (1-1024)</option>
+              <option value="full">Full Range (1-65535) — Slow</option>
+              <option value="custom">Custom...</option>
+            </select>
+          </div>
+          <div class="form-group" id="customPortGroup" style="display:none">
+            <label>Custom Ports (e.g. 80,443,8080 or 1-1024)</label>
+            <input type="text" id="customPorts" placeholder="80,443,8080" class="input">
+          </div>
+          <button class="btn-primary" onclick="startPortScan()">▶ Start Port Scan</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Scan Progress</h2></div>
+        <div class="card-body">
+          <div id="portProgress" class="scan-progress-area">
+            <div class="scan-idle">No scan running</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-header">
+        <h2 id="portResultTitle">Port Results</h2>
+        <span class="badge-count" id="portCount">0</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="data-table">
+          <thead>
+            <tr><th>Port</th><th>Service</th><th>Status</th><th>Banner</th><th>Risk</th></tr>
+          </thead>
+          <tbody id="portResultsBody">
+            <tr><td colspan="5" class="empty-row">Run a port scan to see results</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Known hosts quick-select -->
+    <div class="card mt-16">
+      <div class="card-header"><h2>Quick Select — Known Hosts</h2></div>
+      <div class="card-body">
+        <div id="quickHostButtons" class="host-buttons">Loading hosts...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENUMERATION -->
+  <div class="view" id="view-enumerate">
+    <div class="view-header">
+      <h1>Protocol Enumeration</h1>
+      <p class="view-sub">Phase 1 — Deep-dive into DNS, SMB and other protocols</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="dns">DNS Enumeration</button>
+      <button class="tab-btn" data-tab="smb">SMB Enumeration</button>
+    </div>
+
+    <!-- DNS Tab -->
+    <div class="tab-content active" id="tab-dns">
+      <div class="grid-2 mt-16">
+        <div class="card">
+          <div class="card-header"><h2>DNS Query</h2></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Target Domain</label>
+              <input type="text" id="dnsTarget" placeholder="e.g. example.com" class="input">
+            </div>
+            <button class="btn-primary" onclick="startDNS()">▶ Enumerate DNS</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Progress</h2></div>
+          <div class="card-body">
+            <div id="dnsProgress" class="scan-progress-area">
+              <div class="scan-idle">No scan running</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-16" id="dnsResultsCard" style="display:none">
+        <div class="card-header"><h2>DNS Records</h2></div>
+        <div class="card-body" id="dnsResults"></div>
+      </div>
+    </div>
+
+    <!-- SMB Tab -->
+    <div class="tab-content" id="tab-smb">
+      <div class="grid-2 mt-16">
+        <div class="card">
+          <div class="card-header"><h2>SMB Target</h2></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Target IP</label>
+              <input type="text" id="smbTarget" placeholder="e.g. 192.168.1.10" class="input">
+            </div>
+            <button class="btn-primary" onclick="startSMB()">▶ Enumerate SMB</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Progress</h2></div>
+          <div class="card-body">
+            <div id="smbProgress" class="scan-progress-area">
+              <div class="scan-idle">No scan running</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mt-16" id="smbResultsCard" style="display:none">
+        <div class="card-header"><h2>SMB Findings</h2></div>
+        <div class="card-body" id="smbResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VULNERABILITIES -->
+  <div class="view" id="view-vulns">
+    <div class="view-header">
+      <h1>Vulnerability Analysis</h1>
+      <p class="view-sub">Phase 2 — CVE checks, misconfigs, and risk scoring</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h2>Run Vuln Scan</h2></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Target IP</label>
+            <input type="text" id="vulnTarget" placeholder="e.g. 192.168.1.1" class="input">
+          </div>
+          <button class="btn-primary" onclick="startVulnScan()">▶ Scan for Vulnerabilities</button>
+          <div class="mt-8">
+            <button class="btn-secondary btn-sm" onclick="scanAllHosts()">⚡ Scan All Known Hosts</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Progress</h2></div>
+        <div class="card-body">
+          <div id="vulnProgress" class="scan-progress-area">
+            <div class="scan-idle">No scan running</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-header">
+        <h2>All Vulnerabilities</h2>
+        <div class="filter-bar">
+          <button class="filter-btn active" data-sev="ALL">All</button>
+          <button class="filter-btn" data-sev="CRITICAL">Critical</button>
+          <button class="filter-btn" data-sev="HIGH">High</button>
+          <button class="filter-btn" data-sev="MEDIUM">Medium</button>
+          <button class="filter-btn" data-sev="LOW">Low</button>
+        </div>
+      </div>
+      <div class="card-body p-0" id="vulnsTableWrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Host</th><th>Port</th><th>Service</th><th>Finding</th><th>Severity</th><th>Description</th><th>Fix</th></tr>
+          </thead>
+          <tbody id="vulnsBody">
+            <tr><td colspan="7" class="empty-row">No vulnerabilities found. Run a scan first.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST INVENTORY -->
+  <div class="view" id="view-hosts">
+    <div class="view-header">
+      <h1>Host Inventory</h1>
+      <p class="view-sub">Complete asset inventory with details and notes</p>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="hostSearch" placeholder="🔍 Filter by IP, hostname, vendor..." class="input" oninput="filterHosts()">
+    </div>
+
+    <div class="hosts-grid" id="hostsGrid">
+      <div class="empty-state">No hosts in inventory. Run a discovery scan.</div>
+    </div>
+  </div>
+
+  <!-- SCHEDULER -->
+  <div class="view" id="view-scheduler">
+    <div class="view-header">
+      <h1>Task Scheduler</h1>
+      <p class="view-sub">Phase 3 — Automate recurring scans</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h2>New Scheduled Task</h2></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Task Name</label>
+            <input type="text" id="schedName" placeholder="e.g. Daily Network Check" class="input">
+          </div>
+          <div class="form-group">
+            <label>Scan Type</label>
+            <select class="input" id="schedType">
+              <option value="discovery">Network Discovery</option>
+              <option value="ports">Port Scan</option>
+              <option value="vulns">Vulnerability Scan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Target</label>
+            <input type="text" id="schedTarget" placeholder="IP or network CIDR" class="input">
+          </div>
+          <div class="form-group">
+            <label>Schedule</label>
+            <select class="input" id="schedInterval">
+              <option value="hourly">Every Hour</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="manual">Manual Only</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="addScheduledTask()">+ Add Task</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Scheduled Tasks</h2></div>
+        <div class="card-body p-0" id="scheduledList">
+          <div class="empty-state">No scheduled tasks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="view" id="view-reports">
+    <div class="view-header">
+      <h1>Reports & Export</h1>
+      <p class="view-sub">Phase 3 — Generate and export audit reports</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card report-card">
+        <div class="report-icon">📄</div>
+        <h3>HTML Report</h3>
+        <p>Full audit report in HTML format with styling and tables. Suitable for sharing.</p>
+        <button class="btn-primary" onclick="downloadReport('html')">⬇ Download HTML</button>
+      </div>
+      <div class="card report-card">
+        <div class="report-icon">📝</div>
+        <h3>Plain Text</h3>
+        <p>Raw text report for documentation, logging, or compliance records.</p>
+        <button class="btn-primary" onclick="downloadReport('txt')">⬇ Download TXT</button>
+      </div>
+      <div class="card report-card">
+        <div class="report-icon">🔍</div>
+        <h3>Preview Report</h3>
+        <p>Preview the HTML report in a new browser tab before downloading.</p>
+        <button class="btn-secondary" onclick="previewReport()">👁 Preview</button>
+      </div>
+    </div>
+
+    <div class="card mt-16">
+      <div class="card-header"><h2>Report Summary</h2></div>
+      <div class="card-body" id="reportSummary">
+        <div class="empty-state">Loading report data...</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- HOST DETAIL MODAL -->
+<div class="modal-overlay" id="hostModal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="modalTitle">Host Details</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
