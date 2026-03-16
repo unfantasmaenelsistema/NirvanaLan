@@ -109,7 +109,7 @@ requests >= 2.25
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/nirvana-lan.git
+git clone https://github.com/jpm70/NirvanaLan.git
 cd nirvana-lan
 
 # 2. (Opcional) Crear entorno virtual
