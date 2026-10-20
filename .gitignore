@@ -1,0 +1,12 @@
+# Datos de auditoría: NUNCA al repositorio (contienen IP, MAC y nombres de equipos reales)
+db/
+*.db
+*.sqlite
+reports/
+nirvana_lan_report_*
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+_site/
